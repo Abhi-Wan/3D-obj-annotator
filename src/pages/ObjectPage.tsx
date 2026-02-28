@@ -1,36 +1,34 @@
-import { useState } from 'react'
-import reactLogo from '../assets/react.svg'
-import viteLogo from '/vite.svg'
+
+import { Suspense } from 'react';
+import { Canvas, useLoader } from '@react-three/fiber';
+import { Loader, OrbitControls, Stage, useGLTF } from '@react-three/drei';
+import { OBJLoader, USDLoader } from 'three/examples/jsm/Addons.js';
+import { Model } from '../components/Model';
 import './ObjectPage.css';
 
 export function ObjectPage() {
-  const [count, setCount] = useState(0)
+  const { scene: glb } = useGLTF("/Dune-Ornithopter.glb");
+  const obj  = useLoader(OBJLoader, "/Dune-Ornithopter.obj");
+  const usdz = useLoader(USDLoader, "/1975-Porsche-911.usdz");
 
   return (
     <>
       <link rel="icon" type="image/svg+xml" href="/vite.svg" />
       <title>Annotator</title>
 
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className='canvas-container'>
+        <Canvas dpr={[1, 2]} camera={{ fov: 45 }}>
+          <color attach="background" args={["#101010"]} />
+          <OrbitControls />
+          <Loader />
+          <ambientLight/>
+          <Stage environment={'warehouse'} >
+            <Suspense fallback={<Loader/>}>
+              <Model object={glb} />
+            </Suspense>
+          </Stage>
+        </Canvas>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
