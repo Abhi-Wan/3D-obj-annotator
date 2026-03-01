@@ -1,0 +1,1 @@
+export type FileType = 'glb' | 'gltf' | 'obj' | 'usdz' | null;

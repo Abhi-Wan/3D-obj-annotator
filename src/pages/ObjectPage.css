@@ -13,3 +13,10 @@
   left: 50%;
   transform: translateX(-50%);
 }
+
+.back-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}

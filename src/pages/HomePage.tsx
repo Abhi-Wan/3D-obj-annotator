@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState, type MouseEventHandler } from 'react';
+import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
+import type { FileType } from '../utils/types';
 import './HomePage.css';
 
 export function HomePage() {
-  const [fileType, setFileType] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<FileType>(null);
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const prevUrl = useRef<string | null>(null);
+  const navigate = useNavigate();
 
   const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -16,19 +19,20 @@ export function HomePage() {
     }
 
     const url = URL.createObjectURL(file);
-    const ext = file.name.split('.').pop()?.toLowerCase() || null;
+    const ext = file.name.split('.').pop()?.toLowerCase() as FileType;
 
     prevUrl.current = url;
     setFileType(ext);
     setModelUrl(url);
   }
 
-  useEffect(() => {
-    // Clean up model URL after unmounting
-    return () => {
-      if (prevUrl.current) URL.revokeObjectURL(prevUrl.current);
+  const handleSubmit = () => {
+    if (!modelUrl || !fileType) {
+      alert("Please choose a file");
+      return;
     }
-  }, [])
+    navigate('/object', { state: { modelUrl, fileType } });
+  }
 
   return (
     <>
@@ -47,7 +51,9 @@ export function HomePage() {
         <p>Supported file types: .glb, .gltf, .obj, .usdz</p>
       </div>
 
-      <button className='submit-button'>View model</button>
+      <button className='submit-button' onClick={handleSubmit}>
+        View model
+      </button>
     </>
   )
 }
