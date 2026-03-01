@@ -1,36 +1,53 @@
-import { useState } from 'react'
-import reactLogo from '../assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useRef, useState, type MouseEventHandler } from 'react';
 import './HomePage.css';
 
 export function HomePage() {
-  const [count, setCount] = useState(0)
+  const [fileType, setFileType] = useState<string | null>(null);
+  const [modelUrl, setModelUrl] = useState<string | null>(null);
+  const prevUrl = useRef<string | null>(null);
+
+  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Remove previous model URL to free memory
+    if (prevUrl.current) {
+      URL.revokeObjectURL(prevUrl.current);
+    }
+
+    const url = URL.createObjectURL(file);
+    const ext = file.name.split('.').pop()?.toLowerCase() || null;
+
+    prevUrl.current = url;
+    setFileType(ext);
+    setModelUrl(url);
+  }
+
+  useEffect(() => {
+    // Clean up model URL after unmounting
+    return () => {
+      if (prevUrl.current) URL.revokeObjectURL(prevUrl.current);
+    }
+  }, [])
 
   return (
     <>
       <link rel="icon" type="image/svg+xml" href="/vite.svg" />
       <title>3D Annotator</title>
 
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h1>3D Model Annotator</h1>
+      <h3>Welcome! Upload a 3D model file, annotate, and save a snapshot image of the view</h3>
+
+      <div className='upload-container'>
+        <input
+          type='file'
+          accept='.glb,.gltf,.obj,.usdz'
+          onChange={handleUpload}
+        />
+        <p>Supported file types: .glb, .gltf, .obj, .usdz</p>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
+      <button className='submit-button'>View model</button>
     </>
   )
 }
