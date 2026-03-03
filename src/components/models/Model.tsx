@@ -1,17 +1,22 @@
+import type { ThreeEvent } from "@react-three/fiber";
 import type { FileType } from "../../utils/types";
 import { GLBModel } from "./GLBModel";
 import { OBJModel } from "./OBJModel";
 import { USDModel } from "./USDModel";
 
-export function Model({ url, fileType }: { url: string, fileType: FileType }) {
-  if (fileType === 'glb' || fileType === 'gltf') {
-    return (<GLBModel url={url} />);
-  }
-  if (fileType === 'obj') {
-    return (<OBJModel url={url} />);
-  }
-  if (fileType === 'usdz') {
-    return (<USDModel url={url} />);
-  }
-  return null;
+type ModelProps = {
+  url: string,
+  fileType: FileType,
+  handlePointerDown: (event: ThreeEvent<PointerEvent>) => void;
+  handleClick: (event: ThreeEvent<MouseEvent>) => void;
+}
+
+export function Model({ url, fileType, handlePointerDown, handleClick}: ModelProps) {
+  return (
+    <group onPointerDown={handlePointerDown} onClick={handleClick} >
+      {(fileType === 'glb' || fileType === 'gltf') && <GLBModel url={url} />}
+      {fileType === 'obj' && <OBJModel url={url} />}
+      {fileType === 'usdz' && <USDModel url={url} />}
+    </group>
+  )
 }
