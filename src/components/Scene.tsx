@@ -32,8 +32,11 @@ export function Scene({ url, fileType }: { url: string, fileType: FileType }) {
     if (e.point && e.face) {
       const position = new Vector3(...Object.values(e.point) as [number, number, number]);
       const normal = new Vector3(...Object.values(e.face.normal) as [number, number, number]);
+      if (!normal) return;
+
+      const worldNormal = normal.clone().transformDirection(e.object.matrixWorld);
       
-      setArrows(prev => [...prev, { position, direction: normal }]);
+      setArrows(prev => [...prev, { position, direction: worldNormal }]);
     }
   }
 
