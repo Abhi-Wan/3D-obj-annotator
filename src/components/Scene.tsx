@@ -1,11 +1,16 @@
 import { Suspense, useRef, useState } from 'react';
-import { Canvas, type ThreeEvent } from '@react-three/fiber';
+import { useThree, type ThreeEvent } from '@react-three/fiber';
 import { Bounds, Center, OrbitControls, Stage } from '@react-three/drei';
 import { Vector3 } from 'three';
-import { Model } from '../components/models/Model';
-import { LoaderCustom } from '../components/LoaderCustom';
+import { Model } from './models/Model';
+import { LoaderCustom } from './LoaderCustom';
 import { Arrow } from './annotations/Arrow';
 import type { FileType } from "../utils/types";
+
+type SceneProps = {
+  url: string
+  fileType: FileType
+}
 
 type ArrowData = {
   id: number
@@ -13,7 +18,7 @@ type ArrowData = {
   direction: Vector3
 }
 
-export function Scene({ url, fileType }: { url: string, fileType: FileType }) {
+export function Scene({ url, fileType }: SceneProps) {
   const pointerDownPos = useRef({ x: 0, y: 0 });
   const [arrows, setArrows] = useState<ArrowData[]>([]);
   const arrowId = useRef(0);
@@ -37,14 +42,15 @@ export function Scene({ url, fileType }: { url: string, fileType: FileType }) {
       if (!normal) return;
 
       const worldNormal = normal.clone().transformDirection(e.object.matrixWorld);
-      
+
       setArrows(prev => [...prev, { id: arrowId.current++, position, direction: worldNormal }]);
     }
   }
 
   return (
-    <Canvas dpr={[1, 2]} camera={{ fov: 45 }}>
+    <>
       <color attach='background' args={["#101010"]} />
+      <ambientLight />
       <OrbitControls />
       <Stage adjustCamera={false} environment={'warehouse'}>
         <Suspense fallback={<LoaderCustom />}>
@@ -63,6 +69,6 @@ export function Scene({ url, fileType }: { url: string, fileType: FileType }) {
       {arrows.map(arrow => (
         <Arrow key={arrow.id} position={arrow.position} direction={arrow.direction} />
       ))}
-    </Canvas>
+    </>
   );
 }

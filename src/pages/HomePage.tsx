@@ -5,6 +5,7 @@ import './HomePage.css';
 
 export function HomePage() {
   const [fileType, setFileType] = useState<FileType>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const prevUrl = useRef<string | null>(null);
   const navigate = useNavigate();
@@ -19,10 +20,13 @@ export function HomePage() {
     }
 
     const url = URL.createObjectURL(file);
-    const ext = file.name.split('.').pop()?.toLowerCase() as FileType;
+    const fileNameParts = file.name.split('.');
+    const name = fileNameParts[0];
+    const ext = fileNameParts.pop()?.toLowerCase() as FileType;
 
     prevUrl.current = url;
     setFileType(ext);
+    setFileName(name);
     setModelUrl(url);
   }
 
@@ -31,14 +35,11 @@ export function HomePage() {
       alert("Please choose a file");
       return;
     }
-    navigate('/object', { state: { modelUrl, fileType } });
+    navigate('/object', { state: { modelUrl, fileType, fileName } });
   }
 
   return (
     <>
-      <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-      <title>3D Annotator</title>
-
       <h1>3D Model Annotator</h1>
       <h3>Welcome! Upload a 3D model file, annotate, and save a snapshot image of the view</h3>
 
