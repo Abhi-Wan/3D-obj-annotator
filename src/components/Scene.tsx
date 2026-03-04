@@ -1,11 +1,11 @@
-import { Suspense, useRef, useState } from 'react';
+import { forwardRef, Suspense, useImperativeHandle, useRef, useState } from 'react';
 import { useThree, type ThreeEvent } from '@react-three/fiber';
 import { Bounds, Center, OrbitControls, Stage } from '@react-three/drei';
 import { Vector3 } from 'three';
 import { Model } from './models/Model';
 import { LoaderCustom } from './LoaderCustom';
 import { Arrow } from './annotations/Arrow';
-import type { FileType } from "../utils/types";
+import type { FileType, SceneCaptureRef } from "../utils/types";
 
 type SceneProps = {
   url: string
@@ -18,7 +18,7 @@ type ArrowData = {
   direction: Vector3
 }
 
-export function Scene({ url, fileType }: SceneProps) {
+export const Scene = forwardRef<SceneCaptureRef, SceneProps>(({ url, fileType }, ref) => {
   const pointerDownPos = useRef({ x: 0, y: 0 });
   const [arrows, setArrows] = useState<ArrowData[]>([]);
   const arrowId = useRef(0);
@@ -47,6 +47,20 @@ export function Scene({ url, fileType }: SceneProps) {
     }
   }
 
+  // Screenshot function that is called from ObjectPage on capture button click
+  // Set pixel ratio to selected quality and return render URL for screenshot
+  const { gl, scene, camera } = useThree();
+  useImperativeHandle(ref, () => ({
+    screenshot: (pixelRatio = 3) => {
+      const current = gl.getPixelRatio();
+      gl.setPixelRatio(pixelRatio);
+      gl.render(scene, camera);
+      const url = gl.domElement.toDataURL('image/png');
+      gl.setPixelRatio(current);
+      return url;
+    }
+  }))
+
   return (
     <>
       <color attach='background' args={["#101010"]} />
@@ -71,4 +85,4 @@ export function Scene({ url, fileType }: SceneProps) {
       ))}
     </>
   );
-}
+})

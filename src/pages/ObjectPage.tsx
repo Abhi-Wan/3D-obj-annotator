@@ -1,8 +1,8 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { Canvas } from '@react-three/fiber';
 import { Scene } from '../components/Scene';
-import type { FileType } from '../utils/types';
+import type { FileType, SceneCaptureRef } from '../utils/types';
 import './ObjectPage.css';
 
 type StateType = {
@@ -18,12 +18,25 @@ export function ObjectPage() {
   if (!state) navigate('/');
   const { modelUrl, fileType, fileName } = state as StateType;
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [quality, setQuality] = useState(2);
+  const selectQuality = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const qualitySelected = Number(e.target.value);
+    setQuality(qualitySelected);
+  }
+
+  // Ref for screenshot function (defined in Scene component as it needs Canvas context)
+  const captureRef = useRef<SceneCaptureRef>(null);
   const screenshotIdx = useRef(0);
+
   const handleScreenshot = () => {
-    if (!canvasRef.current) return;
+    const url = captureRef.current?.screenshot(quality);
+    if (!url) {
+      alert("Error capturing screenshot, please try again");
+      return;
+    }
+
     const link = document.createElement('a');
-    link.href = canvasRef.current.toDataURL('image/png');
+    link.href = url;
     link.download = `${fileName}-capture-${screenshotIdx.current++}.png`;
     link.click();
   }
@@ -35,12 +48,12 @@ export function ObjectPage() {
           <Canvas
             dpr={[1, 2]}
             camera={{ fov: 45 }}
-            ref={canvasRef}
             gl={{ preserveDrawingBuffer: true }}
           >
             <Scene
               url={modelUrl}
               fileType={fileType}
+              ref={captureRef}
             />
           </Canvas>
         )}
@@ -49,9 +62,18 @@ export function ObjectPage() {
           Back
         </button>
 
-        <button onClick={handleScreenshot} className='capture-button'>
-          Capture
-        </button>
+        <div className='capture-container'>
+          <button onClick={handleScreenshot}>
+            Capture
+          </button>
+          <p className='res-text'>Resolution:</p>
+          <select value={quality} onChange={selectQuality} className='res-selector'>
+            <option value="1">Low</option>
+            <option value="2">Medium (default)</option>
+            <option value="4">High</option>
+            <option value="6">Very High</option>
+          </select>
+        </div>
       </div>
     </>
   )
