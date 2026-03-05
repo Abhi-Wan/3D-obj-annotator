@@ -1,9 +1,11 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useLoader } from '@react-three/fiber';
 import { Scene } from '../components/Scene';
 import type { FileType, SceneCaptureRef } from '../utils/types';
 import './ObjectPage.css';
+import { useGLTF } from '@react-three/drei';
+import { OBJLoader, USDLoader } from 'three/examples/jsm/Addons.js';
 
 type StateType = {
   modelUrl: string
@@ -17,6 +19,14 @@ export function ObjectPage() {
   const { state } = useLocation();
   if (!state) navigate('/');
   const { modelUrl, fileType, fileName } = state as StateType;
+
+  const [isValidUrl, setIsValidUrl] = useState(true);
+  useEffect(() => {
+    if (!modelUrl) return;
+    fetch(modelUrl)
+      .then(() => setIsValidUrl(true))
+      .catch(() => setIsValidUrl(false));
+  }, [modelUrl])
 
   const [quality, setQuality] = useState(2);
   const selectQuality = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -39,6 +49,27 @@ export function ObjectPage() {
     link.href = url;
     link.download = `${fileName}-capture-${screenshotIdx.current++}.png`;
     link.click();
+  }
+
+  useEffect(() => {
+    // Unmount cleanup: clear loader caches and revoke URL to free memory
+    return () => {
+      if (modelUrl) {
+        useGLTF.clear(modelUrl);
+        useLoader.clear(OBJLoader, modelUrl);
+        useLoader.clear(USDLoader, modelUrl);
+        URL.revokeObjectURL(modelUrl);
+      }
+    }
+  }, [])
+
+  if (!isValidUrl) {
+    return (
+      <div>
+        <h3>Model not found or is no longer available</h3>
+        <button onClick={() => navigate('/')}>Upload new model</button>
+      </div>
+    )
   }
 
   return (
