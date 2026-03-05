@@ -7,7 +7,7 @@ type ArrowProps = {
   color?: string
 }
 
-export function Arrow({ position, direction, length = 2, color = 'red' }: ArrowProps) {
+export function Arrow({ position, direction, length = 0.05, color = 'red' }: ArrowProps) {
   const offsetDistance = length;
 
   // Flip arrow with origin at offset so it's pointing at model

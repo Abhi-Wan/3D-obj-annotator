@@ -1,6 +1,6 @@
 import { forwardRef, Suspense, useImperativeHandle, useRef, useState } from 'react';
 import { useThree, type ThreeEvent } from '@react-three/fiber';
-import { Bounds, Center, OrbitControls, Stage } from '@react-three/drei';
+import { OrbitControls, Stage } from '@react-three/drei';
 import { Vector3 } from 'three';
 import { Model } from './models/Model';
 import { LoaderCustom } from './LoaderCustom';
@@ -68,16 +68,12 @@ export const Scene = forwardRef<SceneCaptureRef, SceneProps>(({ url, fileType },
       <OrbitControls />
       <Stage adjustCamera={false} environment={'warehouse'}>
         <Suspense fallback={<LoaderCustom />}>
-          <Bounds fit clip observe={false}>
-            <Center>
-              <Model
-                url={url}
-                fileType={fileType}
-                handlePointerDown={handlePointerDown}
-                handleClick={handleClick}
-              />
-            </Center>
-          </Bounds>
+          <Model
+            url={url}
+            fileType={fileType}
+            handlePointerDown={handlePointerDown}
+            handleClick={handleClick}
+          />
         </Suspense>
       </Stage>
       {arrows.map(arrow => (

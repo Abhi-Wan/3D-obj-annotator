@@ -47,7 +47,7 @@ export function ObjectPage() {
         {modelUrl && fileType && (
           <Canvas
             dpr={[1, 2]}
-            camera={{ fov: 45 }}
+            camera={{ position: [0, 0, 0.5], near: 0.01, far: 1000, fov: 50 }}
             gl={{ preserveDrawingBuffer: true }}
           >
             <Scene
