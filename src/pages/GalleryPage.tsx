@@ -1,36 +1,37 @@
-import { useState } from 'react'
-import reactLogo from '../assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useNavigate } from 'react-router';
+import ModalImage from 'react-modal-image';
+import { useScreenshots } from '../components/context/ScreenshotContext';
+import { Fallback } from '../components/Fallback';
 import './GalleryPage.css';
 
+
 export function GalleryPage() {
-  const [count, setCount] = useState(0)
+  const navigate = useNavigate();
+  const { screenshots } = useScreenshots();
+
+  if (screenshots.length === 0) {
+    return <Fallback message='No screenshots available to view' />
+  }
 
   return (
-    <>
-      <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-      <title>Gallery</title>
+    <div className='gallery-page'>
+      <h1 className='title'>Gallery</h1>
 
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <button onClick={() => navigate(-1)} className='back-button'>
+        Back
+      </button>
+
+      <div className='gallery-grid'>
+        {screenshots.map((url, index) => (
+          <div key={index} className='photo-container'>
+            <ModalImage
+              className='photo'
+              small={url}
+              large={url}
+            />
+          </div>
+        ))}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }

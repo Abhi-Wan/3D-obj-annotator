@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
+import { ScreenshotProvider } from './components/context/ScreenshotContext.tsx'
 import App from './App.tsx'
 import './index.css'
 
@@ -9,7 +10,9 @@ import './index.css'
  * preventing them from being loaded into the scene and causing fetch errors.
  */
 createRoot(document.getElementById('root')!).render(
+  <ScreenshotProvider>
     <BrowserRouter>
       <App />
     </BrowserRouter>
+  </ScreenshotProvider>
 )

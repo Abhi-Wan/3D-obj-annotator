@@ -39,7 +39,7 @@ export function HomePage() {
   }
 
   return (
-    <>
+    <div className='home-page'>
       <h1>3D Model Annotator</h1>
       <h3>Welcome! Upload a 3D model file, annotate, and save a snapshot image of the view</h3>
 
@@ -55,6 +55,10 @@ export function HomePage() {
       <button className='submit-button' onClick={handleSubmit}>
         View model
       </button>
-    </>
+
+      <button className='gallery-button' onClick={() => navigate('/gallery')}>
+        Screenshot Gallery
+      </button>
+    </div>
   )
 }
