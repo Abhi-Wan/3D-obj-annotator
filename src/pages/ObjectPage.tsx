@@ -1,37 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
-import { Canvas, useLoader } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
-import { OBJLoader, USDLoader } from 'three/examples/jsm/Addons.js';
+import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { Canvas } from '@react-three/fiber';
 import { Scene } from '../components/Scene';
-import { useScreenshots } from '../components/context/ScreenshotContext';
+import { useModelContext } from '../components/context/ModelContext';
+import { useScreenshotContext } from '../components/context/ScreenshotContext';
 import { Fallback } from '../components/Fallback';
-import type { FileType, SceneCaptureRef } from '../utils/types';
+import type { SceneCaptureRef } from '../utils/types';
 import './ObjectPage.css';
-
-type StateType = {
-  modelUrl: string
-  fileType: FileType
-  fileName: string
-}
 
 export function ObjectPage() {
   const navigate = useNavigate();
+  const { modelUrl, fileType, fileName } = useModelContext();
 
-  const { state } = useLocation();
-  if (!state) {
+  if (!modelUrl || !fileType) {
     return <Fallback message='Model not found or is no longer available' />
   }
-  const { modelUrl, fileType, fileName } = state as StateType;
 
-  const [isValidUrl, setIsValidUrl] = useState(true);
-  useEffect(() => {
-    if (!modelUrl) return;
-    fetch(modelUrl)
-      .then(() => setIsValidUrl(true))
-      .catch(() => setIsValidUrl(false));
-  }, [modelUrl])
-
+  // Screenshot resolution (default device pixel ratio of 2)
   const [quality, setQuality] = useState(2);
   const selectQuality = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const qualitySelected = Number(e.target.value);
@@ -40,7 +25,7 @@ export function ObjectPage() {
 
   // Ref for screenshot function (defined in Scene component as it needs Canvas context)
   const captureRef = useRef<SceneCaptureRef>(null);
-  const { addScreenshot } = useScreenshots();
+  const { addScreenshot } = useScreenshotContext();
   const screenshotIdx = useRef(0);
 
   const handleScreenshot = () => {
@@ -50,7 +35,7 @@ export function ObjectPage() {
       return;
     }
 
-    // Add screenshot to context so gallery page can display
+    // Add screenshot to ScreenshotContext for gallery page
     addScreenshot(url);
 
     // Download captured image
@@ -60,36 +45,16 @@ export function ObjectPage() {
     link.click();
   }
 
-  useEffect(() => {
-    // Unmount cleanup: clear loader caches and revoke URL to free memory
-    return () => {
-      if (modelUrl) {
-        useGLTF.clear(modelUrl);
-        useLoader.clear(OBJLoader, modelUrl);
-        useLoader.clear(USDLoader, modelUrl);
-        URL.revokeObjectURL(modelUrl);
-      }
-    }
-  }, [])
-
-  if (!isValidUrl) {
-    return <Fallback message='Model not found or is no longer available' />
-  }
-
   return (
     <div className='object-page'>
       <div className='scene-container'>
         {modelUrl && fileType && (
           <Canvas
             dpr={[1, 2]}
-            camera={{ position: [0, 0, 0.5], near: 0.01, far: 1000, fov: 50 }}
+            camera={{ position: [0, 0, 1.5], near: 0.01, far: 1000, fov: 50 }}
             gl={{ preserveDrawingBuffer: true }}
           >
-            <Scene
-              url={modelUrl}
-              fileType={fileType}
-              ref={captureRef}
-            />
+            <Scene ref={captureRef} />
           </Canvas>
         )}
 

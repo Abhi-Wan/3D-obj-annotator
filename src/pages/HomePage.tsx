@@ -1,41 +1,26 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import type { FileType } from '../utils/types';
+import { useModelContext } from '../components/context/ModelContext';
 import './HomePage.css';
 
 export function HomePage() {
-  const [fileType, setFileType] = useState<FileType>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [modelUrl, setModelUrl] = useState<string | null>(null);
-  const prevUrl = useRef<string | null>(null);
   const navigate = useNavigate();
+  const { setModel } = useModelContext();
+  const [fileSelected, setFileSelected] = useState(false);
 
   const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    // Remove previous model URL to free memory
-    if (prevUrl.current) {
-      URL.revokeObjectURL(prevUrl.current);
-    }
-
-    const url = URL.createObjectURL(file);
-    const fileNameParts = file.name.split('.');
-    const name = fileNameParts[0];
-    const ext = fileNameParts.pop()?.toLowerCase() as FileType;
-
-    prevUrl.current = url;
-    setFileType(ext);
-    setFileName(name);
-    setModelUrl(url);
+    setModel(file);
+    setFileSelected(true);
   }
 
   const handleSubmit = () => {
-    if (!modelUrl || !fileType) {
+    if (!fileSelected) {
       alert("Please choose a file");
       return;
     }
-    navigate('/object', { state: { modelUrl, fileType, fileName } });
+    navigate('/object');
   }
 
   return (

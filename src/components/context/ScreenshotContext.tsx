@@ -5,7 +5,7 @@ type ScreenshotContextType = {
   addScreenshot: (url: string) => void;
 }
 
-export const ScreenshotContext = createContext<ScreenshotContextType | null>(null);
+const ScreenshotContext = createContext<ScreenshotContextType | null>(null);
 
 export function ScreenshotProvider({ children }: { children: React.ReactNode }) {
   const [screenshots, setScreenshots] = useState<string[]>([]);
@@ -21,7 +21,7 @@ export function ScreenshotProvider({ children }: { children: React.ReactNode }) 
   )
 }
 
-export function useScreenshots() {
+export function useScreenshotContext() {
   const context = useContext(ScreenshotContext);
   if (!context) throw new Error('No ScreenshotContext available');
   return context;

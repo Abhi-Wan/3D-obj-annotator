@@ -5,12 +5,7 @@ import { Vector3 } from 'three';
 import { Model } from './models/Model';
 import { LoaderCustom } from './LoaderCustom';
 import { Arrow } from './annotations/Arrow';
-import type { FileType, SceneCaptureRef } from "../utils/types";
-
-type SceneProps = {
-  url: string
-  fileType: FileType
-}
+import type { SceneCaptureRef } from "../utils/types";
 
 type ArrowData = {
   id: number
@@ -18,7 +13,7 @@ type ArrowData = {
   direction: Vector3
 }
 
-export const Scene = forwardRef<SceneCaptureRef, SceneProps>(({ url, fileType }, ref) => {
+export const Scene = forwardRef<SceneCaptureRef>((_, ref) => {
   const pointerDownPos = useRef({ x: 0, y: 0 });
   const [arrows, setArrows] = useState<ArrowData[]>([]);
   const arrowId = useRef(0);
@@ -69,8 +64,6 @@ export const Scene = forwardRef<SceneCaptureRef, SceneProps>(({ url, fileType },
       <Stage adjustCamera={false} environment={'warehouse'}>
         <Suspense fallback={<LoaderCustom />}>
           <Model
-            url={url}
-            fileType={fileType}
             handlePointerDown={handlePointerDown}
             handleClick={handleClick}
           />
