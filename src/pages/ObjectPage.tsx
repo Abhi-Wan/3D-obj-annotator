@@ -16,6 +16,10 @@ export function ObjectPage() {
     return <Fallback message='Model not found or is no longer available' />
   }
 
+  // Annotation options selection
+  const [annotation, setAnnotation] = useState('Arrow');
+  const annotationTypes = ["Arrow", "Textbox"];
+
   // Screenshot resolution (default device pixel ratio of 2)
   const [quality, setQuality] = useState(2);
   const selectQuality = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -54,7 +58,7 @@ export function ObjectPage() {
             camera={{ position: [0, 0, 1.5], near: 0.01, far: 1000, fov: 50 }}
             gl={{ preserveDrawingBuffer: true }}
           >
-            <Scene ref={captureRef} />
+            <Scene annotation={annotation} ref={captureRef} />
           </Canvas>
         )}
 
@@ -62,11 +66,27 @@ export function ObjectPage() {
           Back
         </button>
 
+        <div className="radio-container">
+          <p className='plain-text'>Annotation:</p>
+          {annotationTypes.map(opt => (
+            <label key={opt}>
+              <input
+                type="radio"
+                name="annotation"
+                value={opt}
+                checked={annotation === opt}
+                onChange={() => setAnnotation(opt)}
+              />
+              {opt}
+            </label>
+          ))}
+        </div>
+
         <div className='capture-container'>
-          <button onClick={handleScreenshot}>
+          <button onClick={handleScreenshot} className='capture-button'>
             Capture
           </button>
-          <p className='res-text'>Resolution:</p>
+          <p className='plain-text'>Resolution:</p>
           <select value={quality} onChange={selectQuality} className='res-selector'>
             <option value="1">Low</option>
             <option value="2">Medium (default)</option>

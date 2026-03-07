@@ -5,73 +5,94 @@ import { Vector3 } from 'three';
 import { Model } from './models/Model';
 import { LoaderCustom } from './LoaderCustom';
 import { Arrow } from './annotations/Arrow';
+import { Textbox } from './annotations/Textbox';
 import type { SceneCaptureRef } from "../utils/types";
 
 type ArrowData = {
-  id: number
-  position: Vector3
-  direction: Vector3
+	id: number
+	position: Vector3
+	direction: Vector3
 }
 
-export const Scene = forwardRef<SceneCaptureRef>((_, ref) => {
-  const pointerDownPos = useRef({ x: 0, y: 0 });
-  const [arrows, setArrows] = useState<ArrowData[]>([]);
-  const arrowId = useRef(0);
+type TextboxData = {
+	id: number
+	position: Vector3
+	text: string
+}
 
-  const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
-    pointerDownPos.current = { x: e.clientX, y: e.clientY };
-  }
+export const Scene = forwardRef<SceneCaptureRef, { annotation: string }>(({ annotation }, ref) => {
+	const pointerDownPos = useRef({ x: 0, y: 0 });
+	const [arrows, setArrows] = useState<ArrowData[]>([]);
+	const arrowId = useRef(0);
+	const [textboxes, setTextboxes] = useState<TextboxData[]>([]);
+	const textboxId = useRef(0);
 
-  const handleClick = (e: ThreeEvent<MouseEvent>) => {
-    e.stopPropagation();
+	const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
+		pointerDownPos.current = { x: e.clientX, y: e.clientY };
+	}
 
-    // Ignore click if mouse was dragged (camera control)
-    const dx = e.clientX - pointerDownPos.current.x;
-    const dy = e.clientY - pointerDownPos.current.y;
-    if (Math.sqrt(dx * dx + dy * dy) > 2) return;
+	const handleClick = (e: ThreeEvent<MouseEvent>) => {
+		e.stopPropagation();
 
-    // Get intersection point and normal from the mesh
-    if (e.point && e.face) {
-      const position = new Vector3(...Object.values(e.point) as [number, number, number]);
-      const normal = new Vector3(...Object.values(e.face.normal) as [number, number, number]);
-      if (!normal) return;
+		// Ignore click if mouse was dragged (camera control)
+		const dx = e.clientX - pointerDownPos.current.x;
+		const dy = e.clientY - pointerDownPos.current.y;
+		if (Math.sqrt(dx * dx + dy * dy) > 2) return;
 
-      const worldNormal = normal.clone().transformDirection(e.object.matrixWorld);
+		// Get intersection point and normal from the mesh
+		if (e.point && e.face) {
+			const position = new Vector3(...Object.values(e.point) as [number, number, number]);
 
-      setArrows(prev => [...prev, { id: arrowId.current++, position, direction: worldNormal }]);
-    }
-  }
+			if (annotation === "Arrow") {
+				const normal = new Vector3(...Object.values(e.face.normal) as [number, number, number]);
+				if (!normal) return;
 
-  // Screenshot function that is called from ObjectPage on capture button click
-  // Set pixel ratio to selected quality and return render URL for screenshot
-  const { gl, scene, camera } = useThree();
-  useImperativeHandle(ref, () => ({
-    screenshot: (pixelRatio = 3) => {
-      const current = gl.getPixelRatio();
-      gl.setPixelRatio(pixelRatio);
-      gl.render(scene, camera);
-      const url = gl.domElement.toDataURL('image/png');
-      gl.setPixelRatio(current);
-      return url;
-    }
-  }))
+				const worldNormal = normal.clone().transformDirection(e.object.matrixWorld);
 
-  return (
-    <>
-      <color attach='background' args={["#101010"]} />
-      <ambientLight />
-      <OrbitControls />
-      <Stage adjustCamera={false} environment={'warehouse'}>
-        <Suspense fallback={<LoaderCustom />}>
-          <Model
-            handlePointerDown={handlePointerDown}
-            handleClick={handleClick}
-          />
-        </Suspense>
-      </Stage>
-      {arrows.map(arrow => (
-        <Arrow key={arrow.id} position={arrow.position} direction={arrow.direction} />
+				setArrows(prev => [...prev, { id: arrowId.current++, position, direction: worldNormal }]);
+			}
+
+			if (annotation === "Textbox") {
+				const inputText = window.prompt("Enter annotation text:");
+				if (!inputText) return;
+				setTextboxes(prev => [...prev, { id: textboxId.current++, position, text: inputText }]);
+			}
+		}
+	}
+
+	// Screenshot function that is called from ObjectPage on capture button click
+	// Set pixel ratio to selected quality and return render URL for screenshot
+	const { gl, scene, camera } = useThree();
+	useImperativeHandle(ref, () => ({
+		screenshot: (pixelRatio = 3) => {
+			const current = gl.getPixelRatio();
+			gl.setPixelRatio(pixelRatio);
+			gl.render(scene, camera);
+			const url = gl.domElement.toDataURL('image/png');
+			gl.setPixelRatio(current);
+			return url;
+		}
+	}))
+
+	return (
+		<>
+			<color attach='background' args={["#101010"]} />
+			<ambientLight />
+			<OrbitControls />
+			<Stage adjustCamera={false} environment={'warehouse'}>
+				<Suspense fallback={<LoaderCustom />}>
+					<Model
+						handlePointerDown={handlePointerDown}
+						handleClick={handleClick}
+					/>
+				</Suspense>
+			</Stage>
+			{arrows.map(arrow => (
+				<Arrow key={arrow.id} position={arrow.position} direction={arrow.direction} />
+			))}
+			{textboxes.map(textbox => (
+				<Textbox key={textbox.id} position={textbox.position} text={textbox.text} />
       ))}
-    </>
-  );
+		</>
+	);
 })

@@ -12,6 +12,24 @@
   z-index: 10;
 }
 
+.radio-container {
+  position: absolute;
+  top: 60px;
+  left: 10px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  background-color: #101010;
+  padding: 10px 10px;
+  border-radius: 5px;
+}
+
+.plain-text {
+  font-size: 1em;
+  margin-top: 0px;
+  margin-bottom: 4px;
+}
+
 .capture-container {
   position: absolute;
   top: 10px;
@@ -19,27 +37,20 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
+  background-color: #101010;
+  padding: 10px 10px;
+  border-radius: 5px;
 }
 
-.res-text {
-  font-size: 1em;
-  border-radius: 2px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  margin-top: 4px;
-  margin-bottom: 0px;
-  text-shadow:
-    -1px -1px 1px #101010,
-     1px -1px 1px #101010,
-    -1px  1px 1px #101010,
-     1px  1px 1px #101010;
+.capture-button {
+  margin-bottom: 4px;
 }
 
 .res-selector {
   padding-top: 4px;
   padding-bottom: 4px;
   margin-top: 0px;
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .object-page .gallery-button {

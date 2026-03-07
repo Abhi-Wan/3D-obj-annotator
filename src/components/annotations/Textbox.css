@@ -1,0 +1,7 @@
+.text-box {
+  background: #181c20;
+  color: #c7c8ca;
+  padding: 10px 15px;
+  border-radius: 5px;
+  user-select: none;
+}
