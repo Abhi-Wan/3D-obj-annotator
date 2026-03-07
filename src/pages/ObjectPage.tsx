@@ -30,10 +30,10 @@ export function ObjectPage() {
   // Ref for screenshot function (defined in Scene component as it needs Canvas context)
   const captureRef = useRef<SceneCaptureRef>(null);
   const { addScreenshot } = useScreenshotContext();
-  const screenshotIdx = useRef(0);
+  const screenshotIdx = useRef(1);
 
-  const handleScreenshot = () => {
-    const url = captureRef.current?.screenshot(quality);
+  const handleScreenshot = async () => {
+    const url = await captureRef.current?.screenshot(quality);
     if (!url) {
       alert("Error capturing screenshot, please try again");
       return;
@@ -51,7 +51,7 @@ export function ObjectPage() {
 
   return (
     <div className='object-page'>
-      <div className='scene-container'>
+      <div className='canvas-container' id='canvas-container'>
         {modelUrl && fileType && (
           <Canvas
             dpr={[1, 2]}
@@ -61,44 +61,44 @@ export function ObjectPage() {
             <Scene annotation={annotation} ref={captureRef} />
           </Canvas>
         )}
-
-        <button onClick={() => navigate('/')} className='back-button'>
-          Back
-        </button>
-
-        <div className="radio-container">
-          <p className='plain-text'>Annotation:</p>
-          {annotationTypes.map(opt => (
-            <label key={opt}>
-              <input
-                type="radio"
-                name="annotation"
-                value={opt}
-                checked={annotation === opt}
-                onChange={() => setAnnotation(opt)}
-              />
-              {opt}
-            </label>
-          ))}
-        </div>
-
-        <div className='capture-container'>
-          <button onClick={handleScreenshot} className='capture-button'>
-            Capture
-          </button>
-          <p className='plain-text'>Resolution:</p>
-          <select value={quality} onChange={selectQuality} className='res-selector'>
-            <option value="1">Low</option>
-            <option value="2">Medium (default)</option>
-            <option value="4">High</option>
-            <option value="6">Very High</option>
-          </select>
-        </div>
-
-        <button onClick={() => navigate('/gallery')} className='gallery-button'>
-          Gallery
-        </button>
       </div>
+
+      <button onClick={() => navigate('/')} className='back-button'>
+        Back
+      </button>
+
+      <div className="radio-container">
+        <p className='plain-text'>Annotation:</p>
+        {annotationTypes.map(opt => (
+          <label key={opt}>
+            <input
+              type="radio"
+              name="annotation"
+              value={opt}
+              checked={annotation === opt}
+              onChange={() => setAnnotation(opt)}
+            />
+            {opt}
+          </label>
+        ))}
+      </div>
+
+      <div className='capture-container'>
+        <button onClick={handleScreenshot} className='capture-button'>
+          Capture
+        </button>
+        <p className='plain-text'>Resolution:</p>
+        <select value={quality} onChange={selectQuality} className='res-selector'>
+          <option value="1">Low</option>
+          <option value="2">Medium (default)</option>
+          <option value="3">High</option>
+          <option value="4">Very High</option>
+        </select>
+      </div>
+
+      <button onClick={() => navigate('/gallery')} className='gallery-button'>
+        Gallery
+      </button>
     </div>
   )
 }

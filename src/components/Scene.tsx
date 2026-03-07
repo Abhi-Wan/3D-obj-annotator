@@ -2,6 +2,7 @@ import { forwardRef, Suspense, useImperativeHandle, useRef, useState } from 'rea
 import { useThree, type ThreeEvent } from '@react-three/fiber';
 import { OrbitControls, Stage } from '@react-three/drei';
 import { Vector3 } from 'three';
+import html2canvas from 'html2canvas';
 import { Model } from './models/Model';
 import { LoaderCustom } from './LoaderCustom';
 import { Arrow } from './annotations/Arrow';
@@ -64,11 +65,17 @@ export const Scene = forwardRef<SceneCaptureRef, { annotation: string }>(({ anno
 	// Set pixel ratio to selected quality and return render URL for screenshot
 	const { gl, scene, camera } = useThree();
 	useImperativeHandle(ref, () => ({
-		screenshot: (pixelRatio = 3) => {
+		screenshot: async (pixelRatio = 2) => {
 			const current = gl.getPixelRatio();
 			gl.setPixelRatio(pixelRatio);
 			gl.render(scene, camera);
-			const url = gl.domElement.toDataURL('image/png');
+
+			// Take screenshot with html2canvas instead of gl to include textbox annotations
+			const container = document.getElementById('canvas-container');
+			if (!container) return;
+			const canvas = await html2canvas(container, { scale: pixelRatio });
+			const url = canvas.toDataURL('image/png');
+
 			gl.setPixelRatio(current);
 			return url;
 		}
