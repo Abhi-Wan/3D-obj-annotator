@@ -7,7 +7,7 @@ import { Model } from './models/Model';
 import { LoaderCustom } from './LoaderCustom';
 import { Arrow } from './annotations/Arrow';
 import { Textbox } from './annotations/Textbox';
-import type { SceneCaptureRef } from "../utils/types";
+import { AnnotationType, type SceneCaptureRef } from "../utils/types";
 
 type ArrowData = {
 	id: number
@@ -21,7 +21,7 @@ type TextboxData = {
 	text: string
 }
 
-export const Scene = forwardRef<SceneCaptureRef, { annotation: string }>(({ annotation }, ref) => {
+export const Scene = forwardRef<SceneCaptureRef, { annotation: AnnotationType }>(({ annotation }, ref) => {
 	const pointerDownPos = useRef({ x: 0, y: 0 });
 	const [arrows, setArrows] = useState<ArrowData[]>([]);
 	const arrowId = useRef(0);
@@ -44,7 +44,7 @@ export const Scene = forwardRef<SceneCaptureRef, { annotation: string }>(({ anno
 		if (e.point && e.face) {
 			const position = new Vector3(...Object.values(e.point) as [number, number, number]);
 
-			if (annotation === "Arrow") {
+			if (annotation === AnnotationType.ARROW) {
 				const normal = new Vector3(...Object.values(e.face.normal) as [number, number, number]);
 				if (!normal) return;
 
@@ -53,7 +53,7 @@ export const Scene = forwardRef<SceneCaptureRef, { annotation: string }>(({ anno
 				setArrows(prev => [...prev, { id: arrowId.current++, position, direction: worldNormal }]);
 			}
 
-			if (annotation === "Textbox") {
+			if (annotation === AnnotationType.TEXTBOX) {
 				const inputText = window.prompt("Enter annotation text:");
 				if (!inputText) return;
 				setTextboxes(prev => [...prev, { id: textboxId.current++, position, text: inputText }]);

@@ -5,7 +5,7 @@ import { Scene } from '../components/Scene';
 import { useModelContext } from '../components/context/ModelContext';
 import { useScreenshotContext } from '../components/context/ScreenshotContext';
 import { Fallback } from '../components/Fallback';
-import type { SceneCaptureRef } from '../utils/types';
+import { AnnotationType, type SceneCaptureRef } from '../utils/types';
 import './ObjectPage.css';
 
 export function ObjectPage() {
@@ -17,8 +17,7 @@ export function ObjectPage() {
   }
 
   // Annotation options selection
-  const [annotation, setAnnotation] = useState('Arrow');
-  const annotationTypes = ["Arrow", "Textbox"];
+  const [annotation, setAnnotation] = useState<AnnotationType>(AnnotationType.ARROW);
 
   // Screenshot resolution (default device pixel ratio of 2)
   const [quality, setQuality] = useState(2);
@@ -69,7 +68,7 @@ export function ObjectPage() {
 
       <div className="radio-container">
         <p className='plain-text'>Annotation:</p>
-        {annotationTypes.map(opt => (
+        {Object.values(AnnotationType).map(opt => (
           <label key={opt}>
             <input
               type="radio"
