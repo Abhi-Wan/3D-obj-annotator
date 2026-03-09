@@ -19,6 +19,9 @@ export function ObjectPage() {
   // Annotation options selection
   const [annotation, setAnnotation] = useState<AnnotationType>(AnnotationType.ARROW);
 
+  // State for user setting circle radius
+  const [selectingRadius, setSelectingRadius] = useState(false);
+
   // Screenshot resolution (default device pixel ratio of 2)
   const [quality, setQuality] = useState(2);
   const selectQuality = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -57,7 +60,12 @@ export function ObjectPage() {
             camera={{ position: [0, 0, 1.5], near: 0.01, far: 1000, fov: 50 }}
             gl={{ preserveDrawingBuffer: true }}
           >
-            <Scene annotation={annotation} ref={captureRef} />
+            <Scene
+              annotation={annotation}
+              ref={captureRef}
+              selectingRadius={selectingRadius}
+              onSelectingRadiusChange={setSelectingRadius}
+            />
           </Canvas>
         )}
       </div>
@@ -81,6 +89,12 @@ export function ObjectPage() {
           </label>
         ))}
       </div>
+
+      {annotation === AnnotationType.CIRCLE &&
+        <div className='circle-tooltip'>
+          {selectingRadius ? "Click to set radius" : "Click to set center"}
+        </div>
+      }
 
       <div className='capture-container'>
         <button onClick={handleScreenshot} className='capture-button'>

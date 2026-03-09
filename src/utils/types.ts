@@ -4,7 +4,8 @@ export type SceneCaptureRef = { screenshot: (pixelRatio?: number) => Promise<str
 
 export const AnnotationType = {
   ARROW: "Arrow",
-  TEXTBOX: "Textbox"
+  TEXTBOX: "Textbox",
+  CIRCLE: "Circle"
 } as const;
 
 export type AnnotationType = typeof AnnotationType[keyof typeof AnnotationType];
