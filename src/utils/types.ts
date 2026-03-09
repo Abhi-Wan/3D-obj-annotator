@@ -1,6 +1,10 @@
 export type FileType = 'glb' | 'gltf' | 'obj' | 'usdz' | null;
 
-export type SceneCaptureRef = { screenshot: (pixelRatio?: number) => Promise<string | undefined> };
+export type SceneRef = {
+  screenshot: (pixelRatio?: number) => Promise<string | undefined>
+  undo: () => void
+  clear: () => void
+};
 
 export const AnnotationType = {
   ARROW: "Arrow",

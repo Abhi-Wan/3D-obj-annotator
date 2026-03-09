@@ -12,7 +12,7 @@
   z-index: 10;
 }
 
-.radio-container {
+.annotation-container {
   position: absolute;
   top: 60px;
   left: 10px;
@@ -22,6 +22,14 @@
   background-color: #101010;
   padding: 10px 10px;
   border-radius: 5px;
+}
+
+.undo-button {
+  margin-top: 10px;
+}
+
+.clear-button {
+  margin-top: 6px;
 }
 
 .circle-tooltip {
@@ -38,7 +46,7 @@
 }
 
 .plain-text {
-  font-size: 1em;
+  font-size: 1.1em;
   margin-top: 0px;
   margin-bottom: 4px;
 }

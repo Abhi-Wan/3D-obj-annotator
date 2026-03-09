@@ -8,7 +8,7 @@ import { LoaderCustom } from './LoaderCustom';
 import { Arrow } from './annotations/Arrow';
 import { Textbox } from './annotations/Textbox';
 import { Circle } from './annotations/Circle';
-import { AnnotationType, type SceneCaptureRef } from "../utils/types";
+import { AnnotationType, type SceneRef } from "../utils/types";
 
 type ArrowData = {
   id: number
@@ -30,12 +30,12 @@ type CircleData = {
 }
 
 type SceneProps = {
-  annotation: AnnotationType
+  annotationType: AnnotationType
   selectingRadius: boolean
   onSelectingRadiusChange: (value: boolean) => void
 }
 
-export const Scene = forwardRef<SceneCaptureRef, SceneProps>(({ annotation, selectingRadius, onSelectingRadiusChange }, ref) => {
+export const Scene = forwardRef<SceneRef, SceneProps>(({ annotationType, selectingRadius, onSelectingRadiusChange }, ref) => {
   const pointerDownPos = useRef({ x: 0, y: 0 });
   const annotationId = useRef(0);
   const [arrows, setArrows] = useState<ArrowData[]>([]);
@@ -58,7 +58,7 @@ export const Scene = forwardRef<SceneCaptureRef, SceneProps>(({ annotation, sele
     if (e.point && e.face) {
       const position = new Vector3(...Object.values(e.point) as [number, number, number]);
 
-      if (annotation === AnnotationType.ARROW) {
+      if (annotationType === AnnotationType.ARROW) {
         const normal = new Vector3(...Object.values(e.face.normal) as [number, number, number]);
         if (!normal) return;
 
@@ -67,13 +67,13 @@ export const Scene = forwardRef<SceneCaptureRef, SceneProps>(({ annotation, sele
         setArrows(prev => [...prev, { id: annotationId.current++, position, direction: worldNormal }]);
       }
 
-      if (annotation === AnnotationType.TEXTBOX) {
+      if (annotationType === AnnotationType.TEXTBOX) {
         const inputText = window.prompt("Enter annotation text:");
         if (!inputText) return;
         setTextboxes(prev => [...prev, { id: annotationId.current++, position, text: inputText }]);
       }
 
-      if (annotation === AnnotationType.CIRCLE) {
+      if (annotationType === AnnotationType.CIRCLE) {
         if (!selectingRadius) {
           const normal = new Vector3(...Object.values(e.face.normal) as [number, number, number]);
           if (!normal) return;
@@ -101,9 +101,17 @@ export const Scene = forwardRef<SceneCaptureRef, SceneProps>(({ annotation, sele
       }
     }
   }
-
-  // Screenshot function that is called from ObjectPage on capture button click
-  // Set pixel ratio to selected quality and return render URL for screenshot
+  
+  /*
+   * screenshot
+   *  Set pixel ratio to selected quality and return canvas render URL for screenshot
+   * 
+   * undo
+   *  Remove the last annotation of the currently selected annotation type
+   * 
+   * clear
+   *  Remove all annotations from scene
+   */
   const { gl, scene, camera } = useThree();
   useImperativeHandle(ref, () => ({
     screenshot: async (pixelRatio = 2) => {
@@ -119,6 +127,26 @@ export const Scene = forwardRef<SceneCaptureRef, SceneProps>(({ annotation, sele
 
       gl.setPixelRatio(current);
       return url;
+    },
+
+    undo: () => {
+      switch (annotationType) {
+        case AnnotationType.ARROW:
+          setArrows(prev => prev.slice(0, prev.length - 1));
+          break;
+        case AnnotationType.TEXTBOX:
+          setTextboxes(prev => prev.slice(0, prev.length - 1));
+          break;
+        case AnnotationType.CIRCLE:
+          setCircles(prev => prev.slice(0, prev.length - 1));
+          break;
+      }
+    },
+
+    clear: () => {
+      setArrows([]);
+      setTextboxes([]);
+      setCircles([]);
     }
   }))
 

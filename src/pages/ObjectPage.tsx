@@ -5,7 +5,7 @@ import { Scene } from '../components/Scene';
 import { useModelContext } from '../components/context/ModelContext';
 import { useScreenshotContext } from '../components/context/ScreenshotContext';
 import { Fallback } from '../components/Fallback';
-import { AnnotationType, type SceneCaptureRef } from '../utils/types';
+import { AnnotationType, type SceneRef } from '../utils/types';
 import './ObjectPage.css';
 
 export function ObjectPage() {
@@ -16,8 +16,12 @@ export function ObjectPage() {
     return <Fallback message='Model not found or is no longer available' />
   }
 
+  // Ref for screenshot, undo, and clear functions
+  // (defined in Scene to use its state and Canvas context)
+  const sceneRef = useRef<SceneRef>(null);
+
   // Annotation options selection
-  const [annotation, setAnnotation] = useState<AnnotationType>(AnnotationType.ARROW);
+  const [annotationType, setAnnotationType] = useState<AnnotationType>(AnnotationType.ARROW);
 
   // State for user setting circle radius
   const [selectingRadius, setSelectingRadius] = useState(false);
@@ -29,13 +33,11 @@ export function ObjectPage() {
     setQuality(qualitySelected);
   }
 
-  // Ref for screenshot function (defined in Scene component as it needs Canvas context)
-  const captureRef = useRef<SceneCaptureRef>(null);
   const { addScreenshot } = useScreenshotContext();
   const screenshotIdx = useRef(1);
 
   const handleScreenshot = async () => {
-    const url = await captureRef.current?.screenshot(quality);
+    const url = await sceneRef.current?.screenshot(quality);
     if (!url) {
       alert("Error capturing screenshot, please try again");
       return;
@@ -51,6 +53,16 @@ export function ObjectPage() {
     link.click();
   }
 
+  const handleUndo = () => {
+    sceneRef.current?.undo();
+  }
+
+  const handleClearAll = () => {
+    if (confirm("Are you sure you want to clear all annotations?")) {
+      sceneRef.current?.clear();
+    }
+  }
+
   return (
     <div className='object-page'>
       <div className='canvas-container' id='canvas-container'>
@@ -61,8 +73,8 @@ export function ObjectPage() {
             gl={{ preserveDrawingBuffer: true }}
           >
             <Scene
-              annotation={annotation}
-              ref={captureRef}
+              annotationType={annotationType}
+              ref={sceneRef}
               selectingRadius={selectingRadius}
               onSelectingRadiusChange={setSelectingRadius}
             />
@@ -74,7 +86,7 @@ export function ObjectPage() {
         Back
       </button>
 
-      <div className="radio-container">
+      <div className="annotation-container">
         <p className='plain-text'>Annotation:</p>
         {Object.values(AnnotationType).map(opt => (
           <label key={opt}>
@@ -82,15 +94,21 @@ export function ObjectPage() {
               type="radio"
               name="annotation"
               value={opt}
-              checked={annotation === opt}
-              onChange={() => setAnnotation(opt)}
+              checked={annotationType === opt}
+              onChange={() => setAnnotationType(opt)}
             />
             {opt}
           </label>
         ))}
+        <button className='undo-button' onClick={handleUndo}>
+          Undo
+        </button>
+        <button className='clear-button' onClick={handleClearAll}>
+          Clear all
+        </button>
       </div>
 
-      {annotation === AnnotationType.CIRCLE &&
+      {annotationType === AnnotationType.CIRCLE &&
         <div className='circle-tooltip'>
           {selectingRadius ? "Click to set radius" : "Click to set center"}
         </div>
